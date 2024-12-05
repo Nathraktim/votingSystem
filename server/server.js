@@ -4,6 +4,9 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.get('/', (req, res) => {
     res.send('Welcome to the server');
+});
+app.get('/hiii', (req, res) => {
+    res.send('dhruba');
 })
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
