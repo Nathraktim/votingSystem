@@ -1,0 +1,14 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const dotenv = require('dotenv');
+dotenv.config();
+const allocatorRoutes = require('./routes/allocatorRoutes');
+const { errorHandler } = require('./middlewares/errorMiddleware');
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
+app.use('/allocator', allocatorRoutes);
+app.use(errorHandler);
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => console.log(`Allocator Server running on port ${PORT}`));
