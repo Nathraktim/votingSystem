@@ -13,9 +13,9 @@ const port = process.env.PORT || 3000;
 const config = {
     user: "avnadmin",
     password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_USER,
+    host: "voting-system-votingsystem.i.aivencloud.com",
+    port: 11777,
+    database: "defaultdb",
     ssl: {
         rejectUnauthorized: true,
         ca: fs.readFileSync('./ca.pem').toString(),
