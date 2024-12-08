@@ -99,8 +99,7 @@ app.post('/api/create-poll', async (req, res) => {
 app.post('/api/vote/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
     const { option } = req.body;
-    const ipAddress = req.ip;
-    console.log(ipAddress);
+    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     try {
         const pollResult = await pool.query(
             'SELECT * FROM polls WHERE unique_code = $1 AND expires_at > NOW()',
@@ -120,10 +119,10 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
         }
         updatedOptions.options[optionIndex].votes += 1;
 
-        // await pool.query(
-        //     'UPDATE polls SET options = $1, voted_ips = array_append(voted_ips, $2) WHERE id = $3',
-        //     [JSON.stringify(updatedOptions), ipAddress, poll.id]
-        // );
+        await pool.query(
+            'UPDATE polls SET options = $1, voted_ips = array_append(voted_ips, $2) WHERE id = $3',
+            [JSON.stringify(updatedOptions), ipAddress, poll.id]
+        );
 
         res.status(200).json({ message: 'Vote recorded successfully' });
     } catch (error) {
@@ -133,8 +132,6 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
 });
 app.get('/api/poll/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
-    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    console.log(ipAddress);
     const token = req.headers.authorization?.split(' ')[1];
     try {
         const pollResult = await pool.query(
