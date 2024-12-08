@@ -219,7 +219,7 @@ function CreatePoll({ token, onPollCreated }) {
 
                         </div>
                     </div>
-                    <button type="submit" className="bg-[#2CB557] text-white py-2 hover:bg-blue-600 text-[25px] font-medium font-helvetica px-3 rounded-[11px]">
+                    <button onClick={handleSubmit} className="bg-[#2CB557] text-white py-2 hover:bg-blue-600 text-[25px] font-medium font-helvetica px-3 rounded-[11px]">
                         Generate Link
                     </button>
                 </div>
