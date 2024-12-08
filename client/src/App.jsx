@@ -1,20 +1,28 @@
-import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login.jsx";
-import Home from "./pages/Home.jsx"
-import './App.css'
-function App() {
+import React, { useState } from 'react'
+import Signup from './pages/Signup.jsx'
+import CreatePoll from './pages/CreatePoll'
+import ViewPoll from './pages/ViewPoll'
 
-  return (
-        <BrowserRouter>
-            <Routes>
-                {/*<Route path="/login" element={!isLoggedIn ? <Login /> : <Navigate to="/" />} />*/}
-                {/*<Route path="/home" element={!isLoggedIn ? <Home /> : <Navigate to="/" />} />*/}
-                <Route path="/" element={<Navigate to="/home" />} />
-                <Route path="/home" element=<Home /> />
-            </Routes>
-        </BrowserRouter>
-  )
+function App() {
+    const [token, setToken] = useState(localStorage.getItem('token'))
+    const [currentPoll, setCurrentPoll] = useState(null)
+
+    const handleSignup = (newToken) => {
+        setToken(newToken)
+        localStorage.setItem('token', newToken)
+    }
+
+    const handlePollCreated = (pollUrl) => {
+        setCurrentPoll(pollUrl)
+    }
+
+    return (
+        <div className="">
+            {!token && <Signup onSignup={handleSignup} />}
+            {token && !currentPoll && <CreatePoll token={token} onPollCreated={handlePollCreated} />}
+            {currentPoll && <ViewPoll pollUrl={currentPoll} token={token} />}
+        </div>
+    )
 }
 
 export default App

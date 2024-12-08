@@ -1,9 +1,7 @@
 const express = require('express');
-const { submitVote } = require('../controllers/voteController');
-const { captureIP } = require('../middlewares/ipMiddleware');
-
+const { receiveVote, getResults } = require('../controllers/voteController');
 const router = express.Router();
-
-router.post('/', captureIP, submitVote);
+router.post('/receiveVote', receiveVote);
+router.get('/results/:eventId', getResults);
 
 module.exports = router;
