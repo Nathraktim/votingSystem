@@ -77,11 +77,11 @@ function CreatePoll({ token, onPollCreated }) {
                             </svg>
                         </div>
                     </div>
-                    <div className={"profile flex flex-row items-center gap-3"}>
-                        <div className={"profileLogo h-16"}
-                        onClick={() => {
-                            localStorage.removeItem(token);
-                        }}>
+                    <div className={"profile flex flex-row items-center gap-3 cursor-pointer"}
+                         onClick={() => {
+                             localStorage.removeItem(token);
+                         }}>
+                        <div className={"profileLogo h-16"}>
                             <svg className="h-full w-auto" width="106" height="106" viewBox="0 0 106 106" fill="none"
                                  xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="53" cy="53" r="53" fill="#D9D9D9"/>

@@ -6,10 +6,18 @@ const { v4: uuidv4 } = require('uuid');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const fs = require('fs');
+const http = require('http');
+const socketIo = require('socket.io');
+
 dotenv.config();
+
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
 const port = process.env.PORT || 3000;
 
+// PostgreSQL config
 const config = {
     user: "avnadmin",
     password: process.env.DB_PASSWORD,
@@ -21,11 +29,24 @@ const config = {
         ca: fs.readFileSync('./ca.pem').toString(),
     },
 };
-//done
-// Create a connection pool
+
 const pool = new Pool(config);
 
-// Execute a query using the pool
+// Middleware setup
+const corsOptions = {
+    origin: process.env.CLIENT_DOMAIN || 'http://localhost:5173',
+    optionsSuccessStatus: 200,
+    credentials: true,
+};
+app.use(cors(corsOptions));
+app.use(express.json());
+
+// Utility function to generate unique codes
+function generateUniqueCode() {
+    return uuidv4().substr(0, 8);
+}
+
+// Database connection test
 pool.connect((err, client, release) => {
     if (err) {
         console.error("Error acquiring client:", err);
@@ -33,7 +54,7 @@ pool.connect((err, client, release) => {
     }
 
     client.query("SELECT VERSION()", [], (err, result) => {
-        release(); // Release the client back to the pool
+        release();
         if (err) {
             console.error("Query error:", err.stack);
         } else {
@@ -42,20 +63,12 @@ pool.connect((err, client, release) => {
     });
 });
 
-console.log(fs.readFileSync('./ca.pem').toString());
-const corsOptions = {
-    origin: process.env.CLIENT_DOMAIN || 'http://localhost:5173',
-    optionsSuccessStatus: 200,
-    credentials: true,
-};
-app.use(cors(corsOptions));
-app.use(express.json());
-function generateUniqueCode() {
-    return uuidv4().substr(0, 8);
-}
-app.get('/', function (req, res) {
-    res.status(200).send('dhuruba jhora');
+// Routes
+app.get('/', (req, res) => {
+    res.status(200).send('Voting system server is running!');
 });
+
+// Signup route
 app.post('/api/signup', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -71,6 +84,8 @@ app.post('/api/signup', async (req, res) => {
         res.status(500).json({ error: 'Error creating user' });
     }
 });
+
+// Poll creation route
 app.post('/api/create-poll', async (req, res) => {
     const { question, options, expiresAt } = req.body;
     const token = req.headers.authorization?.split(' ')[1];
@@ -96,10 +111,13 @@ app.post('/api/create-poll', async (req, res) => {
         res.status(500).json({ error: 'Error creating poll' });
     }
 });
+
+// Voting route
 app.post('/api/vote/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
     const { option } = req.body;
     const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
     try {
         const pollResult = await pool.query(
             'SELECT * FROM polls WHERE unique_code = $1 AND expires_at > NOW()',
@@ -108,10 +126,12 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
         if (pollResult.rows.length === 0) {
             return res.status(404).json({ error: 'Poll not found or has expired' });
         }
+
         const poll = pollResult.rows[0];
         if (poll.voted_ips.includes(ipAddress)) {
             return res.status(400).json({ error: 'You have already voted on this poll' });
         }
+
         const updatedOptions = poll.options;
         const optionIndex = updatedOptions.options.findIndex(opt => opt.text === option);
         if (optionIndex === -1) {
@@ -119,10 +139,19 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
         }
         updatedOptions.options[optionIndex].votes += 1;
 
+        // Update the poll in the database
         await pool.query(
             'UPDATE polls SET options = $1, voted_ips = array_append(voted_ips, $2) WHERE id = $3',
             [JSON.stringify(updatedOptions), ipAddress, poll.id]
         );
+
+        // Emit real-time update to all connected clients
+        io.to(uniqueCode).emit('pollUpdate', {
+            question: poll.question,
+            options: updatedOptions.options,
+            expiresAt: poll.expires_at,
+            isExpired: new Date(poll.expires_at) < new Date(),
+        });
 
         res.status(200).json({ message: 'Vote recorded successfully' });
     } catch (error) {
@@ -130,10 +159,12 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
         res.status(500).json({ error: 'Error recording vote' });
     }
 });
+
+// Fetch poll details route
 app.get('/api/poll/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
     const token = req.headers.authorization?.split(' ')[1];
-    console.log(token);
+
     try {
         const pollResult = await pool.query(
             'SELECT * FROM polls WHERE unique_code = $1',
@@ -142,17 +173,18 @@ app.get('/api/poll/:uniqueCode', async (req, res) => {
         if (pollResult.rows.length === 0) {
             return res.status(404).json({ error: 'Poll not found' });
         }
+
         const poll = pollResult.rows[0];
         let isCreator = false;
         if (token) {
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                console.log(decoded);
                 isCreator = decoded.userId === poll.user_id;
             } catch (error) {
                 console.error('Token verification error:', error);
             }
         }
+
         const response = {
             question: poll.question,
             options: poll.options.options.map(opt => ({ text: opt.text, votes: isCreator ? opt.votes : undefined })),
@@ -166,7 +198,21 @@ app.get('/api/poll/:uniqueCode', async (req, res) => {
         res.status(500).json({ error: 'Error fetching poll' });
     }
 });
-app.listen(port, () => {
+
+// WebSocket setup for real-time updates
+io.on('connection', (socket) => {
+    console.log('A user connected');
+    socket.on('joinPoll', (uniqueCode) => {
+        socket.join(uniqueCode);
+        console.log(`User joined poll: ${uniqueCode}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('A user disconnected');
+    });
+});
+
+// Start the server
+server.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-console.log('Server initialized with all routes, neeeee');
