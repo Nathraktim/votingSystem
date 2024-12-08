@@ -12,7 +12,7 @@ function ViewPoll({ pollUrl, token }) {
     const fetchPoll = async () => {
         try {
             const uniqueCode = pollUrl.split('/').pop()
-            const response = await fetch(`http://localhost:3000/api/poll/${uniqueCode}`, {
+            const response = await fetch(`https://votingsystem-du6f.onrender.com/api/poll/${uniqueCode}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
@@ -34,7 +34,7 @@ function ViewPoll({ pollUrl, token }) {
 
         try {
             const uniqueCode = pollUrl.split('/').pop()
-            const response = await fetch(`http://localhost:3000/api/vote/${uniqueCode}`, {
+            const response = await fetch(`https://votingsystem-du6f.onrender.com/api/vote/${uniqueCode}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
