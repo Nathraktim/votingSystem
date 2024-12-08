@@ -82,11 +82,8 @@ function CreatePoll({ token, onPollCreated }) {
                              console.log('Clicked');
                              localStorage.removeItem('token');
                          }}>
-                        <div className={"profileLogo h-16"}>
-                            <svg className="h-full w-auto" width="106" height="106" viewBox="0 0 106 106" fill="none"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="53" cy="53" r="53" fill="#D9D9D9"/>
-                            </svg>
+                        <div className={"profileLogo h-16 text-red-600"}>
+                            Logout
                         </div>
                     </div>
                 </div>
