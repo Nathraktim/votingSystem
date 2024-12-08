@@ -10,12 +10,16 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    password: process.env.DB_PASSWORD,
+const config = {
+    user: "avnadmin",
+    password: "AVNS_PNsyqYW2guiD3VLnRYc",
+    host: "voting-system-votingsystem.i.aivencloud.com",
+    port: 11777,
+    database: "defaultdb",
     ssl: {
         rejectUnauthorized: true,
-        ca: `-----BEGIN CERTIFICATE-----
+        ca: `
+-----BEGIN CERTIFICATE-----
 MIIEQTCCAqmgAwIBAgIUWVDd+n2dFVE5GCySQIFKatl8iUowDQYJKoZIhvcNAQEM
 BQAwOjE4MDYGA1UEAwwvZmQ1MWRkYmMtNTEwOS00ZmUwLWEwY2MtOGY2MzQ1MjE3
 MzA3IFByb2plY3QgQ0EwHhcNMjQxMjA4MDEzODAxWhcNMzQxMjA2MDEzODAxWjA6
@@ -39,8 +43,29 @@ LnhiMQj5QcHRIrPSJmvfwSPLgt/5n3VU3oSP+3/IsQoLywEK41BauX3W+7v1dRje
 az8ybvbdK0gUySTS/yOtArTmcfn5LRr/G04iy2pEMS94qCssze/ICoxmuBJzLob1
 aIaV0B/jrH8GyKKrUPRNschzPluMowmEdukBCAnLwba/VsyRUR76GNbVnsRma2Lu
 6ozeOtFkQZRHVE/UrycBHHDtfMSDNEd4oJYJmLktHausJo1wfg==
------END CERTIFICATE-----`,
+-----END CERTIFICATE-----
+`,
     },
+};
+
+// Create a connection pool
+const pool = new Pool(config);
+
+// Execute a query using the pool
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error("Error acquiring client:", err.stack);
+        return;
+    }
+
+    client.query("SELECT VERSION()", [], (err, result) => {
+        release(); // Release the client back to the pool
+        if (err) {
+            console.error("Query error:", err.stack);
+        } else {
+            console.log("PostgreSQL Version:", result.rows[0].version);
+        }
+    });
 });
 
 console.log(fs.readFileSync('./ca.pem').toString());
