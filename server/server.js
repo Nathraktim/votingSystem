@@ -133,6 +133,8 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
 });
 app.get('/api/poll/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
+    const ipAddress = req.ip;
+    console.log(ipAddress);
     const token = req.headers.authorization?.split(' ')[1];
     try {
         const pollResult = await pool.query(
