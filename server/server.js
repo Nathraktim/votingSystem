@@ -28,7 +28,7 @@ const pool = new Pool(config);
 // Execute a query using the pool
 pool.connect((err, client, release) => {
     if (err) {
-        console.error("Error acquiring client:", err.stack);
+        console.error("Error acquiring client:", err);
         return;
     }
 
@@ -167,4 +167,4 @@ app.get('/api/poll/:uniqueCode', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-console.log('Server initialized with all routes, new');
+console.log('Server initialized with all routes, neeeee');
