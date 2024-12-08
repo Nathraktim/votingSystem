@@ -14,8 +14,8 @@ const config = {
     user: "avnadmin",
     password: process.env.DB_PASSWORD,
     host: process.env.DB_HOST,
-    port: 11777,
-    database: "defaultdb",
+    port: process.env.DB_PORT,
+    database: process.env.DB_USER,
     ssl: {
         rejectUnauthorized: true,
         ca: `
