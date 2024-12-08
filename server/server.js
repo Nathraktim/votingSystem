@@ -12,8 +12,8 @@ const port = process.env.PORT || 3000;
 
 const config = {
     user: "avnadmin",
-    password: "AVNS_PNsyqYW2guiD3VLnRYc",
-    host: "voting-system-votingsystem.i.aivencloud.com",
+    password: process.env.DB_PASSWORD,
+    host: process.env.DB_HOST,
     port: 11777,
     database: "defaultdb",
     ssl: {
