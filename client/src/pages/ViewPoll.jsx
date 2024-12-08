@@ -22,7 +22,7 @@ function ViewPoll({ pollUrl, token }) {
             const data = await response.json()
             if (response.ok) {
                 setPoll(data)
-                setURL(`https://votingsystem-du6f.onrender.com/api/poll/${uniqueCode}`);
+                setURL(`https://voting-system-ecru.vercel.app/${uniqueCode}`);
             } else {
                 alert(data.error)
             }
