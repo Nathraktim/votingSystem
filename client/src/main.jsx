@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
 import App from './App.jsx';
@@ -6,7 +6,7 @@ import ViewPoll from './pages/ViewPoll.jsx';
 import './index.css';
 
 function PollRouteWrapper() {
-    let token = useState(localStorage.getItem('token'))
+    let token = localStorage.getItem('token');
     const { id } = useParams();
     const pollUrl = `https://voting-system-ecru.vercel.app/${id}`;
     console.log(pollUrl);
