@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-function Signup({ onSignup }) {
+function Signup( {onSignup , onLogin}) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    // const [token , setToken] = useState(localStorage.getItem('token'))
 
     const handleSignupSubmit = async (e) => {
         e.preventDefault()

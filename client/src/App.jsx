@@ -18,7 +18,7 @@ function App() {
 
     return (
         <div className="">
-            {!token && <Signup onSignup={handleSignup} />}
+            {!token && <Signup onSignup={handleSignup} onLogin={handleSignup} />}
             {token && !currentPoll && <CreatePoll token={token} onPollCreated={handlePollCreated} />}
             {currentPoll && <ViewPoll pollUrl={currentPoll} token={token} />}
         </div>
