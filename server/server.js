@@ -99,8 +99,8 @@ app.post('/api/create-poll', async (req, res) => {
 app.post('/api/vote/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
     const { option } = req.body;
-    console.log(req);
     const ipAddress = req.ip;
+    console.log(ipAddress);
     try {
         const pollResult = await pool.query(
             'SELECT * FROM polls WHERE unique_code = $1 AND expires_at > NOW()',
