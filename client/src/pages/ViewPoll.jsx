@@ -11,7 +11,8 @@ function ViewPoll({ pollUrl, token }) {
 
     const fetchPoll = async () => {
         try {
-            const uniqueCode = pollUrl.split('/').pop()
+            const uniqueCode = pollUrl.split('/').pop();
+            console.log(uniqueCode);
             const response = await fetch(`https://votingsystem-du6f.onrender.com/api/poll/${uniqueCode}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,

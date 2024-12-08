@@ -8,6 +8,7 @@ import './index.css';
 function PollRouteWrapper() {
     const { id } = useParams();
     const pollUrl = `https://voting-system-ecru.vercel.app/${id}`;
+    console.log(pollUrl);
     return <ViewPoll pollUrl={pollUrl} />;
 }
 
