@@ -6,9 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const fs = require('fs');
-
 dotenv.config();
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -20,23 +18,19 @@ const pool = new Pool({
         ca: fs.readFileSync('./ca.pem').toString(),
     },
 });
-
-// CORS configuration
 const corsOptions = {
-    origin: process.env.CLIENT_DOMAIN || 'http://localhost:5173', // Allow requests from the frontend
+    origin: process.env.CLIENT_DOMAIN || 'http://localhost:5173',
     optionsSuccessStatus: 200,
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+    credentials: true,
 };
-
 app.use(cors(corsOptions));
 app.use(express.json());
-
-// Helper function to generate a unique 8-character code
 function generateUniqueCode() {
     return uuidv4().substr(0, 8);
 }
-
-// Step 1: User Signup
+app.get('/', function (req, res) {
+    res.status(200).send('dhuruba jhora');
+});
 app.post('/api/signup', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -52,8 +46,6 @@ app.post('/api/signup', async (req, res) => {
         res.status(500).json({ error: 'Error creating user' });
     }
 });
-
-// Step 2: Create Poll
 app.post('/api/create-poll', async (req, res) => {
     const { question, options, expiresAt } = req.body;
     const token = req.headers.authorization?.split(' ')[1];
@@ -79,39 +71,27 @@ app.post('/api/create-poll', async (req, res) => {
         res.status(500).json({ error: 'Error creating poll' });
     }
 });
-
-// Step 3: Vote on Poll
 app.post('/api/vote/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
     const { option } = req.body;
     const ipAddress = req.ip;
-
     try {
-        // Check if poll exists and hasn't expired
         const pollResult = await pool.query(
             'SELECT * FROM polls WHERE unique_code = $1 AND expires_at > NOW()',
             [uniqueCode]
         );
-
         if (pollResult.rows.length === 0) {
             return res.status(404).json({ error: 'Poll not found or has expired' });
         }
-
         const poll = pollResult.rows[0];
-
-        // Check if IP has already voted
         if (poll.voted_ips.includes(ipAddress)) {
             return res.status(400).json({ error: 'You have already voted on this poll' });
         }
-
-        // Update vote count and add IP to voted list
         const updatedOptions = poll.options;
         const optionIndex = updatedOptions.options.findIndex(opt => opt.text === option);
-
         if (optionIndex === -1) {
             return res.status(400).json({ error: 'Invalid option' });
         }
-
         updatedOptions.options[optionIndex].votes += 1;
 
         await pool.query(
@@ -125,25 +105,18 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
         res.status(500).json({ error: 'Error recording vote' });
     }
 });
-
-// Get Poll (for both creator and voters)
 app.get('/api/poll/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
     const token = req.headers.authorization?.split(' ')[1];
-
     try {
         const pollResult = await pool.query(
             'SELECT * FROM polls WHERE unique_code = $1',
             [uniqueCode]
         );
-
         if (pollResult.rows.length === 0) {
             return res.status(404).json({ error: 'Poll not found' });
         }
-
         const poll = pollResult.rows[0];
-
-        // If token is provided, check if the requester is the poll creator
         let isCreator = false;
         if (token) {
             try {
@@ -153,8 +126,6 @@ app.get('/api/poll/:uniqueCode', async (req, res) => {
                 console.error('Token verification error:', error);
             }
         }
-
-        // Prepare the response based on whether the requester is the creator or not
         const response = {
             question: poll.question,
             options: poll.options.options.map(opt => ({ text: opt.text, votes: isCreator ? opt.votes : undefined })),
@@ -162,16 +133,13 @@ app.get('/api/poll/:uniqueCode', async (req, res) => {
             isExpired: new Date(poll.expires_at) < new Date(),
             isCreator
         };
-
         res.status(200).json(response);
     } catch (error) {
         console.error('Get poll error:', error);
         res.status(500).json({ error: 'Error fetching poll' });
     }
 });
-
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-
 console.log('Server initialized with all routes');
