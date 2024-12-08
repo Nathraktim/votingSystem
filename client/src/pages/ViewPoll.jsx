@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 function ViewPoll({ pollUrl, token }) {
     const [poll, setPoll] = useState(null)
+    const [URL, setURL] = useState('')
     const [selectedOption, setSelectedOption] = useState('')
     const [hasVoted, setHasVoted] = useState(false)
 
@@ -21,6 +22,7 @@ function ViewPoll({ pollUrl, token }) {
             const data = await response.json()
             if (response.ok) {
                 setPoll(data)
+                setURL(`https://votingsystem-du6f.onrender.com/api/poll/${uniqueCode}`);
             } else {
                 alert(data.error)
             }
@@ -91,6 +93,7 @@ function ViewPoll({ pollUrl, token }) {
             )}
             {poll.isCreator && (
                 <div className="mt-6">
+                    <h4>{URL}</h4>
                     <h3 className="text-xl font-bold mb-2">Results:</h3>
                     {poll.options.map((option, index) => (
                         <div key={index} className="flex justify-between">
