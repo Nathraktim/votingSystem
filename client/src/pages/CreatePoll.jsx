@@ -54,6 +54,7 @@ function CreatePoll({ token, onPollCreated }) {
             alert('An error occurred while creating the poll')
         }
     }
+    //done almost
 
     return (
         <div className={"w-screen bg-[#2B2B2B]"}>
