@@ -45,7 +45,7 @@ function ViewPoll({ pollUrl, token }) {
             const data = await response.json()
             if (response.ok) {
                 setHasVoted(true)
-                fetchPoll() // Refresh poll data
+                fetchPoll()
             } else {
                 alert(data.error)
             }

@@ -99,6 +99,7 @@ app.post('/api/create-poll', async (req, res) => {
 app.post('/api/vote/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
     const { option } = req.body;
+    console.log(req);
     const ipAddress = req.ip;
     try {
         const pollResult = await pool.query(
@@ -119,10 +120,10 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
         }
         updatedOptions.options[optionIndex].votes += 1;
 
-        await pool.query(
-            'UPDATE polls SET options = $1, voted_ips = array_append(voted_ips, $2) WHERE id = $3',
-            [JSON.stringify(updatedOptions), ipAddress, poll.id]
-        );
+        // await pool.query(
+        //     'UPDATE polls SET options = $1, voted_ips = array_append(voted_ips, $2) WHERE id = $3',
+        //     [JSON.stringify(updatedOptions), ipAddress, poll.id]
+        // );
 
         res.status(200).json({ message: 'Vote recorded successfully' });
     } catch (error) {

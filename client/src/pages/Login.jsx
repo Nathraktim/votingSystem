@@ -7,7 +7,6 @@ function Login() {
     const handleSubmitEvent = (e) => {
         e.preventDefault();
         if (input.username !== "" && input.password !== "") {
-            //dispatch action from hooks
         }
         alert("please provide a valid input");
     };
