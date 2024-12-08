@@ -133,6 +133,7 @@ app.post('/api/vote/:uniqueCode', async (req, res) => {
 app.get('/api/poll/:uniqueCode', async (req, res) => {
     const { uniqueCode } = req.params;
     const token = req.headers.authorization?.split(' ')[1];
+    console.log(token);
     try {
         const pollResult = await pool.query(
             'SELECT * FROM polls WHERE unique_code = $1',
@@ -146,6 +147,7 @@ app.get('/api/poll/:uniqueCode', async (req, res) => {
         if (token) {
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                console.log(decoded);
                 isCreator = decoded.userId === poll.user_id;
             } catch (error) {
                 console.error('Token verification error:', error);
