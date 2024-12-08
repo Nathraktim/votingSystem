@@ -21,41 +21,6 @@ function CreatePoll({ token, onPollCreated }) {
         setExpiresAt(formattedDate);
     }, []);
 
-    const handleInputClick = () => {
-        document.querySelector("#datetime-input").showPicker();
-    };
-
-    const formatDateForDisplay = (date) => {
-        if (!date) return "Select Date & Time";
-
-        const now = new Date();
-        const targetDate = new Date(date);
-        const diffInDays = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
-        const hours = targetDate.getHours();
-        const minutes = targetDate.getMinutes();
-        const ampm = hours >= 12 ? "PM" : "AM";
-        const formattedTime = `${hours % 12 || 12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
-
-        if (now.toDateString() === targetDate.toDateString()) {
-            return `Today, ${formattedTime}`;
-        }
-        if (diffInDays === 1) {
-            return `Tomorrow, ${formattedTime}`;
-        }
-        if (diffInDays === -1) {
-            return `Yesterday, ${formattedTime}`;
-        }
-        if (diffInDays > 1 && diffInDays <= 7) {
-            return `${targetDate.toLocaleDateString(undefined, { weekday: "long" })}, ${formattedTime}`;
-        }
-        if (diffInDays < -1 && diffInDays >= -7) {
-            return `Last ${targetDate.toLocaleDateString(undefined, { weekday: "long" })}, ${formattedTime}`;
-        }
-        return targetDate.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) +
-            `, ${formattedTime}`;
-    };
-
-
         const handleOptionChange = (index, value) => {
         const newOptions = [...options]
         newOptions[index] = value
@@ -78,6 +43,7 @@ function CreatePoll({ token, onPollCreated }) {
                 }),
             })
             const data = await response.json()
+            console.log(data);
             if (response.ok) {
                 onPollCreated(data.pollUrl)
             } else {
