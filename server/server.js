@@ -18,6 +18,7 @@ const pool = new Pool({
         ca: fs.readFileSync('./ca.pem').toString(),
     },
 });
+console.log(fs.readFileSync('./ca.pem').toString());
 const corsOptions = {
     origin: process.env.CLIENT_DOMAIN || 'http://localhost:5173',
     optionsSuccessStatus: 200,
